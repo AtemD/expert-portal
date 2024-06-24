@@ -38,7 +38,7 @@ class ClientResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')->required(),
                 TextColumn::make('contractStatus.name')
                 ->badge()
                 ->color(fn (string $state): string => match ($state) {

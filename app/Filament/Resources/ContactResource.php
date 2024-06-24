@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 
 class ContactResource extends Resource
@@ -22,14 +25,25 @@ class ContactResource extends Resource
     protected static ?string $model = Contact::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-identification';
-
+    
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')->required(),
                 TextInput::make('email')->required(),
-                TextInput::make('phone_number')->required(),
+                PhoneInput::make('phone')
+                    ->label('Phone Number')
+                    ->required()
+                    ->validateFor(
+                        lenient: false
+                    )
+                    ->validationMessages([
+                        '*' => 'The :attribute is invalid.',
+                    ])
+                    ->defaultCountry('SS')
+                    ->initialCountry('ss')
+                    ->onlyCountries(['ss', 'ke','ug', 'us']),
                 Select::make('client_id')
                 ->label('Client')
                 ->relationship('client', 'name')
@@ -44,7 +58,7 @@ class ContactResource extends Resource
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),
-                TextColumn::make('phone_number'),
+                PhoneColumn::make('phone')->displayFormat(PhoneInputNumberType::NATIONAL),
                 TextColumn::make('client.name'),
             ])
             ->filters([

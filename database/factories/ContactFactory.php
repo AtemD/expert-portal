@@ -24,7 +24,7 @@ class ContactFactory extends Factory
             'client_id' => function () {
                 return Client::factory()->create()->id;
             },
-            'phone_number' => $this->faker->phoneNumber,
+            'phone' => $this->faker->phoneNumber,
         ];
 
     }

@@ -24,7 +24,7 @@ class ContactsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('email')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('phone_number')
+                Forms\Components\TextInput::make('phone')
                     ->required()
                     ->maxLength(12),
             ]);
@@ -37,7 +37,7 @@ class ContactsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('phone_number'),
+                Tables\Columns\TextColumn::make('phone'),
                 ])
             ->filters([
                 //
