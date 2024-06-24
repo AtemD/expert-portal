@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
+use App\Filament\Resources\ContactResource\Pages;
+use App\Filament\Resources\ContactResource\RelationManagers;
+use App\Models\Contact;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,39 +12,29 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 
-class UserResource extends Resource
-{
-    protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+class ContactResource extends Resource
+{
+    protected static ?string $model = Contact::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-identification';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label('Username')
-                    ->required()
-                    ->string()
-                    ->minLength(3)
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
-                TextInput::make('email')
-                    ->label('Email address')
-                    ->required()
-                    ->email()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
-                TextInput::make('password')
-                    ->required()
-                    ->minLength(6)
-                    ->label('Password')
-                    ->password()
-                    
+                TextInput::make('name')->required(),
+                TextInput::make('email')->required(),
+                TextInput::make('phone_number')->required(),
+                Select::make('client_id')
+                ->label('Client')
+                ->relationship('client', 'name')
+                ->searchable()
+                ->preload()    
             ]);
     }
 
@@ -54,6 +44,8 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),
+                TextColumn::make('phone_number'),
+                TextColumn::make('client.name'),
             ])
             ->filters([
                 //
@@ -78,9 +70,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListContacts::route('/'),
+            'create' => Pages\CreateContact::route('/create'),
+            'edit' => Pages\EditContact::route('/{record}/edit'),
         ];
     }
 }
