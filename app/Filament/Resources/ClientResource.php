@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Filament\Resources\ClientResource\RelationManagers;
 use App\Models\Client;
+use App\Models\Contact;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -19,6 +20,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use App\Models\ContractStatus;
 use Filament\Tables\Enums\FiltersLayout;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 
 class ClientResource extends Resource
@@ -58,11 +60,14 @@ class ClientResource extends Resource
                         'Terminated' => 'danger',
                     })
                     ->searchable(),
-                TextColumn::make('contacts.name')
+                TextColumn::make('contacts')
                     ->listWithLineBreaks()
                     ->bulleted()
                     ->limitList(3)
                     ->expandableLimitedList()
+                    ->formatStateUsing(function ($state, Client $client) {
+                        return $state->name . ' ' . '[ ' . $state->phone . ' ]';
+                    })
                     ->placeholder('No contacts.')
                     ->searchable(),
                 TextColumn::make('platforms.name')
