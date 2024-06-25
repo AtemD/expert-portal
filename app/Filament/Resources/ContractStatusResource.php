@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SiteResource\Pages;
-use App\Filament\Resources\SiteResource\RelationManagers;
-use App\Models\Site;
+use App\Filament\Resources\ContractStatusResource\Pages;
+use App\Filament\Resources\ContractStatusResource\RelationManagers;
+use App\Models\ContractStatus;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,16 +13,19 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextArea;
 use Filament\Tables\Columns\TextColumn;
 
-class SiteResource extends Resource
+class ContractStatusResource extends Resource
 {
-    protected static ?string $model = Site::class;
+    protected static ?string $model = ContractStatus::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationGroup = "Settings";
+
+    protected static ?int $navigationSort = 2;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -32,11 +35,16 @@ class SiteResource extends Resource
                     ->string()
                     ->minLength(2)
                     ->maxLength(255),
-                Select::make('client_id')
+                TextInput::make('color')
                     ->required()
-                    ->relationship('client', 'name')
-                    ->searchable('name')
-                    ->preload()
+                    ->string()
+                    ->minLength(2)
+                    ->maxLength(255),
+                TextArea::make('description')
+                    ->required()
+                    ->string()
+                    ->minLength(3)
+                    ->maxLength(255),
             ]);
     }
 
@@ -45,7 +53,8 @@ class SiteResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
-                TextColumn::make('client.name'),
+                TextColumn::make('color'),
+                TextColumn::make('description')->wrap(),
             ])
             ->filters([
                 //
@@ -70,9 +79,9 @@ class SiteResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSites::route('/'),
-            'create' => Pages\CreateSite::route('/create'),
-            'edit' => Pages\EditSite::route('/{record}/edit'),
+            'index' => Pages\ListContractStatuses::route('/'),
+            'create' => Pages\CreateContractStatus::route('/create'),
+            'edit' => Pages\EditContractStatus::route('/{record}/edit'),
         ];
     }
 }

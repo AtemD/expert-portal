@@ -40,7 +40,7 @@ class PlatformsRelationManager extends RelationManager
                 Tables\Actions\AttachAction::make()->multiple()->preloadRecordSelect(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Tables\Actions\DetachAction::make(),
                 // Tables\Actions\DeleteAction::make(),
             ])

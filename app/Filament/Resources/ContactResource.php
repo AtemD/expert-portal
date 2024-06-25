@@ -25,13 +25,23 @@ class ContactResource extends Resource
     protected static ?string $model = Contact::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-identification';
-    
+
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
-                TextInput::make('email')->required(),
+                TextInput::make('name')
+                    ->required()
+                    ->string()
+                    ->minLength(2)
+                    ->maxLength(255),
+                TextInput::make('email')
+                    ->required()
+                    ->email()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 PhoneInput::make('phone')
                     ->label('Phone Number')
                     ->required()
@@ -43,12 +53,13 @@ class ContactResource extends Resource
                     ])
                     ->defaultCountry('SS')
                     ->initialCountry('ss')
-                    ->onlyCountries(['ss', 'ke','ug', 'us']),
+                    ->onlyCountries(['ss', 'ke', 'ug', 'us']),
                 Select::make('client_id')
-                ->label('Client')
-                ->relationship('client', 'name')
-                ->searchable()
-                ->preload()    
+                    ->required()
+                    ->label('Client')
+                    ->relationship('client', 'name')
+                    ->searchable()
+                    ->preload()
             ]);
     }
 

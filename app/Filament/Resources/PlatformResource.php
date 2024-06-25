@@ -22,12 +22,24 @@ class PlatformResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
 
+    protected static ?string $navigationGroup = "Settings";
+
+    protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
-                TextArea::make('description')->required(),
+                TextInput::make('name')
+                    ->required()
+                    ->string()
+                    ->minLength(2)
+                    ->maxLength(255),
+                TextArea::make('description')
+                    ->required()
+                    ->string()
+                    ->minLength(3)
+                    ->maxLength(255),
 
             ]);
     }

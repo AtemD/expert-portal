@@ -9,6 +9,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -18,15 +23,28 @@ class ContactsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->required()
+                    ->string()
+		            ->minLength(2)
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
+                TextInput::make('email')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('phone')
+                    ->email()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
+                PhoneInput::make('phone')
+                    ->label('Phone Number')
                     ->required()
-                    ->maxLength(12),
+                    ->validateFor(
+                        lenient: false
+                    )
+                    ->validationMessages([
+                        '*' => 'The :attribute is invalid.',
+                    ])
+                    ->defaultCountry('SS')
+                    ->initialCountry('ss')
+                    ->onlyCountries(['ss', 'ke','ug', 'us']),
             ]);
     }
 
@@ -35,10 +53,11 @@ class ContactsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('phone'),
-                ])
+                TextColumn::make('name'),
+                TextColumn::make('email'),
+                PhoneColumn::make('phone')->displayFormat(PhoneInputNumberType::INTERNATIONAL),
+                TextColumn::make('client.name'),
+            ])
             ->filters([
                 //
             ])

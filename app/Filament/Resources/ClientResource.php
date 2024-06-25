@@ -9,6 +9,8 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\MultiSelectFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -16,6 +18,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use App\Models\ContractStatus;
+use Filament\Tables\Enums\FiltersLayout;
+
 
 class ClientResource extends Resource
 {
@@ -27,10 +31,16 @@ class ClientResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
+                TextInput::make('name')
+                    ->required()
+                    ->string()
+                    ->minLength(2)
+                    ->maxLength(255),
                 Select::make('contract_status_id')
-                ->label('contract_status')
-                ->relationship('ContractStatus', 'name')
+                    ->label('Contract Status')
+                    ->required()
+                    ->exists(table: ContractStatus::class, column: 'id')
+                    ->relationship('ContractStatus', 'name'),
             ]);
     }
 
@@ -38,43 +48,57 @@ class ClientResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->required(),
+                TextColumn::make('name')
+                    ->searchable(),
                 TextColumn::make('contractStatus.name')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'Pending' => 'gray',
-                    'Active' => 'success',
-                    'Terminated' => 'danger',
-                }),
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'Pending' => 'gray',
+                        'Active' => 'success',
+                        'Terminated' => 'danger',
+                    })
+                    ->searchable(),
                 TextColumn::make('contacts.name')
-                ->listWithLineBreaks()
-                ->bulleted()
-                ->limitList(3)
-                ->expandableLimitedList()
-                ->placeholder('No contacts.'),
+                    ->listWithLineBreaks()
+                    ->bulleted()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->placeholder('No contacts.')
+                    ->searchable(),
                 TextColumn::make('platforms.name')
-                ->listWithLineBreaks()
-                ->limitList(5)
-                ->expandableLimitedList()
-                ->placeholder('No platforms.'),
+                    ->listWithLineBreaks()
+                    ->limitList(5)
+                    ->expandableLimitedList()
+                    ->placeholder('No platforms.')
+                    ->searchable(),
                 TextColumn::make('sites.name')
-                ->listWithLineBreaks()
-                ->limitList(5)
-                ->expandableLimitedList()
-                ->placeholder('No sites.'),
+                    ->listWithLineBreaks()
+                    ->limitList(5)
+                    ->expandableLimitedList()
+                    ->placeholder('No sites.')
+                    ->searchable(),
             ])
-            
+
             ->filters([
-                //
-            ])
+                SelectFilter::make('contract_status')
+                    ->label('Contract Status')
+                    ->relationship('contractStatus', 'name')
+                    ->preload(),
+                MultiSelectFilter::make('platforms')
+                    ->label('Platform')
+                    ->relationship('platforms', 'name')
+                    ->preload()
+                    ->searchable(),
+            ], layout: FiltersLayout::AboveContentCollapsible)
+
             ->actions([
                 // Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
