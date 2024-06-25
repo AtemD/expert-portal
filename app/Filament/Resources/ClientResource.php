@@ -60,13 +60,17 @@ class ClientResource extends Resource
                         'Terminated' => 'danger',
                     })
                     ->searchable(),
-                TextColumn::make('contacts')
+                TextColumn::make('contacts.name')
                     ->listWithLineBreaks()
                     ->bulleted()
                     ->limitList(3)
                     ->expandableLimitedList()
-                    ->formatStateUsing(function ($state, Client $client) {
-                        return $state->name . ' ' . '[ ' . $state->phone . ' ]';
+                    ->formatStateUsing(function (string $state, $record) {
+                        $contact = $record->contacts->firstWhere('name', $state);
+                        if (!is_null($contact)) {
+                            return $contact->name . ' ' . '[ ' . $contact->phone . ' ]';
+                        }
+                        return $state;
                     })
                     ->placeholder('No contacts.')
                     ->searchable(),
@@ -102,7 +106,7 @@ class ClientResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
