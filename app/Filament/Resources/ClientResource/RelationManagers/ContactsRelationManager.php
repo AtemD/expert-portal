@@ -14,6 +14,9 @@ use Filament\Forms\Components\TextInput;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
+// use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Components\Radio;
+use Filament\Tables\Columns\IconColumn;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -26,7 +29,7 @@ class ContactsRelationManager extends RelationManager
                 TextInput::make('name')
                     ->required()
                     ->string()
-		            ->minLength(2)
+                    ->minLength(2)
                     ->maxLength(255),
                 TextInput::make('email')
                     ->required()
@@ -44,7 +47,17 @@ class ContactsRelationManager extends RelationManager
                     ])
                     ->defaultCountry('SS')
                     ->initialCountry('ss')
-                    ->onlyCountries(['ss', 'ke','ug', 'us']),
+                    ->onlyCountries(['ss', 'ke', 'ug', 'us']),
+                Radio::make('is_primary_contact')
+                    ->label('Is this a primary contact?')
+                    ->boolean()
+                    ->inline()
+                    ->inlineLabel(false),
+                // ToggleButtons::make('is_primary_contact')
+                //     ->label('Is this a primary contact?')
+                //     ->boolean()
+                //     ->inline()
+                //     ->inlineLabel(false)
             ]);
     }
 
@@ -57,6 +70,20 @@ class ContactsRelationManager extends RelationManager
                 TextColumn::make('email'),
                 PhoneColumn::make('phone')->displayFormat(PhoneInputNumberType::INTERNATIONAL),
                 TextColumn::make('client.name'),
+                Tables\Columns\BooleanColumn::make('is_primary_contact')
+                    ->label('Is Primary Contact')
+                    ->action(function ($record, $column) {
+                        $name = $column->getName();
+                        $record->update([
+                            $name => !$record->$name
+                        ]);
+                    }),
+                // IconColumn::make('is_primary_contact')
+                //     ->label('Is Primary Contact')
+                //     ->color(fn(string $state): string => match ($state) {
+                //         '1' => 'info',
+                //         '0' => 'warning',
+                //     })
             ])
             ->filters([
                 //

@@ -18,7 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
-
+use Filament\Forms\Components\ToggleButtons;
 
 class ContactResource extends Resource
 {
@@ -59,7 +59,11 @@ class ContactResource extends Resource
                     ->label('Client')
                     ->relationship('client', 'name')
                     ->searchable()
-                    ->preload()
+                    ->preload(),
+                ToggleButtons::make('Primary Contact')
+                    ->label('Is this a primary contact?')
+                    ->boolean()
+                    ->inline()
             ]);
     }
 

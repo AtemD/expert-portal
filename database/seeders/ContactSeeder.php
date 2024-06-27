@@ -23,6 +23,13 @@ class ContactSeeder extends Seeder
             Contact::factory()->times(mt_rand(1, 3))->create([
                 'client_id' => $client->id,
             ]);
+
+            // obtain a random contact for this client, make that contact, primary 
+            $client_with_contacts = $client->load('contacts');
+            $primary_contact = $client_with_contacts->contacts->random();
+
+            $primary_contact->is_primary_contact = true;
+            $primary_contact->save();
         });
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
