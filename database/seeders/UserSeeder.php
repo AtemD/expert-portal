@@ -16,11 +16,13 @@ class UserSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('users')->truncate();
 
+        // Create an admin to login with 
         User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@example.com'
         ]);
 
+        // create 122 other normal users
         User::factory()->times(122)->create();
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');

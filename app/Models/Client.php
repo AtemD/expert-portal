@@ -9,6 +9,7 @@ use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Enums\ContractStatus;
 
 class Client extends Model
 {
@@ -19,8 +20,13 @@ class Client extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name', 'contract_status_id',
+    // protected $fillable = [
+    //     'name',
+    //     'contract_status',
+    // ];
+
+    protected $casts = [
+        'contract_status' => ContractStatus::class,
     ];
 
     /**
@@ -56,13 +62,8 @@ class Client extends Model
     }
 
     // client has may sites, therefore, a site belongs to a client
-    public function sites(): HasMany   
+    public function sites(): HasMany
     {
         return $this->hasMany(Site::class);
-    }
-
-    public function contractStatus(): BelongsTo
-    {
-        return $this->belongsTo(ContractStatus::class);
     }
 }

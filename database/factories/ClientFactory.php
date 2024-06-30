@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\ContractStatus;
+use App\Enums\ContractStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,10 +20,8 @@ class ClientFactory extends Factory
         $name = $this->faker->word;
 
         return [
-            'name' => 'client_'.$name,
-            'contract_status_id' => function () {
-                return ContractStatus::factory()->create()->id;
-            },
+            'name' => 'client_' . $name,
+            'contract_status' => $this->faker->randomElement(array_keys(ContractStatus::toList())),
         ];
     }
 }

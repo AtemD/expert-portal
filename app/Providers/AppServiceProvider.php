@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Event;
+use App\Events\EmailClient;
+use App\Listeners\SendClientEmail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Model::preventLazyLoading();
         Model::unguard();
     }
 }
