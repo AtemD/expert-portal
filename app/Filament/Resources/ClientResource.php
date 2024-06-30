@@ -146,9 +146,9 @@ class ClientResource extends Resource
                                 // At this point the client has at least 1 contact and the clients contract status is active
                 
                                 // Obtain primary and secondary contacts 
-                                $primaryContacts = new Collection();
-                                $secondaryContacts = new Collection();
-                                foreach ($record->contacts()->get() as $contact) {
+                                $primaryContacts = collect();
+                                $secondaryContacts = collect();
+                                foreach ($record->contacts as $contact) {
                                     if ($contact->is_primary_contact) {
                                         $primaryContacts->push($contact->email);
                                     } else {
@@ -160,7 +160,7 @@ class ClientResource extends Resource
                                 $primaryContactsCount = $primaryContacts->count();
                                 $secondaryContactsCount = $secondaryContacts->count();
 
-                                // condition 1: No primary contact with 0 or more secondary contacts 
+                                // CONDITION 1: No primary contact with 0 or more secondary contacts 
                                 if ($primaryContactsCount < 1) {
                                     // get/pluck a random secondary contact from the secondaryContacts collection and cc the rest if the remaining count is greater than or equal to 1
                                     $primaryContact = $secondaryContacts->random();
@@ -180,7 +180,7 @@ class ClientResource extends Resource
 
                                 }
 
-                                // condition 2: 1 or more primary contacts, with 0 or more secondary contacts 
+                                // CONDITION 2: One or more primary contacts, with 0 or more secondary contacts 
                                 if ($primaryContactsCount >= 1) {
 
                                     // one primary contact 
@@ -191,11 +191,13 @@ class ClientResource extends Resource
 
                                     // more than one primary contact
                                     if ($primaryContactsCount > 1) {
+
                                         $primaryContact = $primaryContacts->first();
 
                                         $updatedPrimaryContacts = $primaryContacts->reject(function ($value, $key) use ($primaryContact): bool {
                                             return $value === $primaryContact;
                                         });
+
                                         // merge the updatedSecondaryContact with the secondary contacts
                                         $updatedSecondaryContacts = $secondaryContacts->merge($updatedPrimaryContacts);
 
