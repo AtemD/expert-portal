@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 
 use App\Enums\ContractStatus;
-use App\Events\EmailClient;
+// use App\Events\EmailClient;
 use App\Filament\Exports\ClientExporter;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Filament\Resources\ClientResource\RelationManagers;
@@ -22,14 +22,17 @@ use Filament\Tables\Table;
 // use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\SelectColumn;
+// use Filament\Tables\Columns\SelectColumn;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Actions\ExportBulkAction;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\TextArea;
 use Filament\Tables\Columns\BooleanColumn;
-use App\Models\Contact;
+// use App\Models\Contact;
+
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailClient; // as EmailClientMail;
 
 class ClientResource extends Resource
 {
@@ -129,6 +132,8 @@ class ClientResource extends Resource
                     BulkAction::make('Email Clients')
                         ->icon('heroicon-o-envelope')
                         ->action(function (Collection $records, array $data): void {
+                            // $data['subject'] = "test subject 2";
+                            // $data['message'] = "test message 2";
 
                             foreach ($records as $record) {
                                 // EmailClient::dispatch($record);
@@ -158,74 +163,53 @@ class ClientResource extends Resource
 
                                 // get the count of primary and secondary contacts to be used later to determine how to send the mail 
                                 $primaryContactsCount = $primaryContacts->count();
-                                $secondaryContactsCount = $secondaryContacts->count();
+
+                                // Set the primary and secondary contacts 
+                                $primaryContact = "";
+                                $updatedSecondaryContacts = collect();
 
                                 // CONDITION 1: No primary contact with 0 or more secondary contacts 
                                 if ($primaryContactsCount < 1) {
                                     // get/pluck a random secondary contact from the secondaryContacts collection and cc the rest if the remaining count is greater than or equal to 1
                                     $primaryContact = $secondaryContacts->random();
-
+                                    
                                     // filter the secondary contacts to exclude the primary contact we just randomly took.
                                     $updatedSecondaryContacts = $secondaryContacts->reject(function ($value, $key) use ($primaryContact): bool {
                                         return $value === $primaryContact;
-                                    });
-
-                                    // if the secondary contacts count is less that 1, just send to primary contact since you do not have anyone to cc to
-                                    if ($secondaryContactsCount < 1) {
-
-                                    } else {
-                                        // we have at least 1 secondary contact we can cc to 
-                                        // meaning if the secondary contacts count is 1 or more, send to primary contact and cc the secondary contacts 
-                                    }
-
+                                    });                                    
                                 }
 
                                 // CONDITION 2: One or more primary contacts, with 0 or more secondary contacts 
                                 if ($primaryContactsCount >= 1) {
 
-                                    // one primary contact 
-                                    if ($primaryContactsCount === 1) {
                                         $primaryContact = $primaryContacts->first();
-                                        // send to primary contact, cc the other secondary contact if they are present
-                                    }
-
-                                    // more than one primary contact
-                                    if ($primaryContactsCount > 1) {
-
-                                        $primaryContact = $primaryContacts->first();
-
                                         $updatedPrimaryContacts = $primaryContacts->reject(function ($value, $key) use ($primaryContact): bool {
                                             return $value === $primaryContact;
                                         });
 
-                                        // merge the updatedSecondaryContact with the secondary contacts
+                                        // merge the updatedSecondaryContact with the secondary contacts, incase we have multiple primary contacts
                                         $updatedSecondaryContacts = $secondaryContacts->merge($updatedPrimaryContacts);
-
-                                        // send to primary contact, cc the updatedSecondaryContacts if they are present
-                                    }
 
                                 }
 
-                                // REFACTOR NOTES;
-                                // Create the following functions
-                                // noPrimaryContact(); // make a random secondary contact the primary, cc the rest if theres at least one 
-                                // oneOrMorePrimaryContacts(); // for 1 primary, cc the rest, for more primary, take one primary, cc the rest
-                
+                                Mail::to($primaryContact)
+                                    ->cc($updatedSecondaryContacts->all())
+                                    ->send(new EmailClient($data['subject'], $data['message']));
                             }
                         })
-                    // ->form([
-                    //     TextInput::make('subject')
-                    //         ->required()
-                    //         ->string()
-                    //         ->minLength(2)
-                    //         ->maxLength(255),
-                    //     TextArea::make('message')
-                    //         ->required()
-                    //         ->string()
-                    //         ->minLength(3)
-                    //         ->maxLength(255),
-                    // ])
-                    // ->deselectRecordsAfterCompletion()
+                    ->form([
+                        TextInput::make('subject')
+                            ->required()
+                            ->string()
+                            ->minLength(2)
+                            ->maxLength(255),
+                        TextArea::make('message')
+                            ->required()
+                            ->string()
+                            ->minLength(3)
+                            ->maxLength(255),
+                    ])
+                    ->deselectRecordsAfterCompletion()
                 ]),
             ]);
     }
